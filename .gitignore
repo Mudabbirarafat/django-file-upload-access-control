@@ -1,0 +1,10 @@
+# secrets
+.env
+# local data
+*.sqlite3
+uploaded_media/
+# python
+__pycache__/
+*.pyc
+venv/
+.venv/

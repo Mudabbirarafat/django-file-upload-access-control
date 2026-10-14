@@ -123,9 +123,9 @@ django_file_upload_access_control/
 
 ```
 DEBUG=True
-SECRET_KEY=django-insecure-dev-key-change-in-production
+SECRET_KEY=your-django-secret-key
 ALLOWED_HOSTS=localhost,127.0.0.1
-FERNET_KEY=EzC5SMdH8EEsTMsvMzNmCEFZ_-lg1EzieJNYhlsDnBQ=
+FERNET_KEY=your-fernet-key
 CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8000
 ```
 
