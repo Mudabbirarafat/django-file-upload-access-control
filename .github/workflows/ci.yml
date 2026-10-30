@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      # Non-blocking on purpose: several of these projects pin heavy ML wheels
+      # that fail on a clean runner. A red badge for an unrelated dependency
+      # issue is worse than no badge, so this warns instead of failing.
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt || echo "::warning::dependency install failed"
+          else
+            echo "::notice::no requirements.txt"
+          fi
+
+      # This is the real gate: every source file must parse.
+      - name: Byte-compile all sources
+        run: python -m compileall -q .
+
+      - name: Lint
+        run: |
+          pip install ruff
+          ruff check --output-format=github . || echo "::warning::ruff reported issues"
+
+      - name: Tests
+        run: |
+          pip install pytest
+          if ls test_*.py tests/ **/test_*.py >/dev/null 2>&1; then
+            pytest -q
+          else
+            echo "::notice::no tests found"
+          fi

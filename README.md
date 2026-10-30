@@ -1,3 +1,7 @@
+# django-file-upload-access-control
+
+[![CI](https://github.com/Mudabbirarafat/django-file-upload-access-control/actions/workflows/ci.yml/badge.svg)](https://github.com/Mudabbirarafat/django-file-upload-access-control/actions/workflows/ci.yml)
+
 📁 Django File Upload & Access Control API
 
 A secure, production-ready backend built with Django and Django REST Framework that provides encrypted file uploads, fine-grained access control, JWT-based authentication, and time-limited signed download URLs.
