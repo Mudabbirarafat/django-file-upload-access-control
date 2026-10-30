@@ -1,0 +1,44 @@
+# Render blueprint for the Django service.
+#
+# The Django project lives one directory down, in
+# django_file_upload_access_control/. That nesting is why the Vercel deployment
+# found nothing to build and served a 404 - there is no manage.py or
+# requirements.txt at the repository root. rootDir points Render at the real
+# project.
+#
+# The app itself was already deployment-ready: gunicorn and whitenoise are in
+# requirements.txt, and SECRET_KEY, DEBUG and ALLOWED_HOSTS all read from the
+# environment.
+#
+# Caveat on the free plan: the filesystem is ephemeral. db.sqlite3 and
+# uploaded_media/ reset whenever the instance restarts or redeploys, and it
+# sleeps after ~15 minutes idle. Fine for a demo. For durability, attach a
+# Render disk (paid) or move to Render Postgres plus object storage.
+
+services:
+  - type: web
+    name: django-file-upload-access-control
+    runtime: python
+    plan: free
+    region: singapore
+    rootDir: django_file_upload_access_control
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
+    startCommand: python manage.py migrate --noinput && gunicorn file_share.wsgi:application --bind 0.0.0.0:$PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.6"
+      - key: DEBUG
+        value: "False"
+      # Django accepts a leading dot as a subdomain wildcard, so this covers
+      # whatever hostname Render assigns.
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com,localhost,127.0.0.1"
+      - key: SECRET_KEY
+        generateValue: true
+      # FERNET_KEY encrypts stored files and must be a valid 32-byte url-safe
+      # base64 Fernet key, so it cannot be auto-generated as a random string.
+      # Generate one with:
+      #   python examples/generate_fernet_key.py
+      # then paste it into the Render dashboard when prompted.
+      - key: FERNET_KEY
+        sync: false
